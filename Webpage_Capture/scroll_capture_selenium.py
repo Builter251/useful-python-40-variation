@@ -1,42 +1,37 @@
 from selenium import webdriver
 import time
 
-# Chrome 브라우저 시작
+# 웹 드라이버 초기화
 driver = webdriver.Chrome()
 
 # 캡처할 웹 페이지 열기
-url = 'https://www.naver.com'
-driver.get(url)
-
-# 웹 페이지 로딩을 위해 충분한 시간 기다리기 (필요에 따라 조절)
-time.sleep(5)
-
-# 페이지 높이 구하기
-page_height = driver.execute_script("return document.documentElement.scrollHeight")
-
-# 브라우저 높이만큼 스크롤하며 스크린샷 찍기
 screenshot_count = 0
+url = "https://www.naver.com"  # 캡처할 페이지 URL 입력
+driver.get(url)
+time.sleep(5)  # 페이지가 로드될 때까지 대기
 
+# 스크롤 루프 시작
 while True:
-    # 스크린샷 찍기
-    screenshot_path = f"./screenshots/screenshot_{screenshot_count}.png"
+    # 웹 페이지의 필요한 요소를 선택
+    
+    # 자바스크립트 실행하여 스크롤 정보 가져오기
+    scroll_height = driver.execute_script("return document.documentElement.scrollHeight;")
+    scroll_top = driver.execute_script("return document.documentElement.scrollTop;")
+    client_height = driver.execute_script("return document.documentElement.clientHeight;")
+    
+    
+    screenshot_path = f"/Webpage_Capture/screenshot_{screenshot_count}.png"
     driver.save_screenshot(screenshot_path)
     print(f"Saved screenshot: {screenshot_path}")
-    
-    # 페이지 아래로 스크롤
-    driver.execute_script("window.scrollBy(0, window.innerHeight);")
-    
-    # 스크롤 후 로딩을 위해 충분한 시간 기다리기 (필요에 따라 조절)
-    time.sleep(5)
-    
-    # 현재 스크롤 위치 확인
-    current_scroll = driver.execute_script("return window.pageYOffset;")
-    
-    # 전체 페이지를 다 스크롤한 경우 종료
-    if current_scroll-1 >= page_height:
-        break
-    
     screenshot_count += 1
 
-# Chrome 브라우저 종료
+    # 스크롤이 페이지 끝까지 도달하면 루프 종료
+    if scroll_height - scroll_top == client_height:
+        break
+
+    # 스크롤 다운
+    driver.execute_script("window.scrollBy(0, window.innerHeight);")
+    time.sleep(5)  # 스크롤 후 대기
+
+# 웹 드라이버 종료
 driver.quit()
